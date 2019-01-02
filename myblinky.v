@@ -12,14 +12,13 @@ module myblinky (
 );
 
     wire clkhf;
-    SB_HFOSC #(
-        .CLKHF_DIV("0b00")
-    ) hfosc (
-        .CLKHFPU(1),
-        .CLKHFEN(1),
-        .CLKHF(clk)
-    );
-    assign clk = clkhf;
+    // SB_HFOSC #(
+    //     .CLKHF_DIV("0b00")
+    // ) hfosc (
+    //     .CLKHFPU(1),
+    //     .CLKHFEN(1),
+    //     .CLKHF(clk)
+    // );
 
     // wire clklf;
     // SB_LFOSC clk_lf (
@@ -28,10 +27,13 @@ module myblinky (
     //     .CLKLF(clklf)
     // );
 
-    // SB_GB clk_gb (
-    //     .USER_SIGNAL_TO_GLOBAL_BUFFER(clki),
-    //     .GLOBAL_BUFFER_OUTPUT(clk)
-    // );
+    wire clkosc;
+    SB_GB clk_gb (
+        .USER_SIGNAL_TO_GLOBAL_BUFFER(clki),
+        .GLOBAL_BUFFER_OUTPUT(clkosc)
+    );
+
+    assign clk = clkosc;
 
     wire user_5_pulled;
     SB_IO #(
@@ -90,7 +92,7 @@ module myblinky (
         .RGBLEDEN(1'b1),
         .RGB0PWM(~user_5_pulled),
         .RGB1PWM(~user_6_pulled),
-        .RGB2PWM(counter[0] & counter[1] & counter[2] & outcnt[0]),
+        .RGB2PWM(outcnt[4]),
         .RGB0(led_r),
         .RGB1(led_g),
         .RGB2(led_b)
