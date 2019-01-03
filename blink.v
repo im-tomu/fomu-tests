@@ -1,4 +1,4 @@
-module myblinky (
+module blink (
     output led_r,
     output led_g,
     output led_b,
