@@ -9,7 +9,7 @@ set_io clki_alt 20
 set_io clki 44
 set_io user_1 48
 set_io user_2 47
-set_io uesr_3 46
+set_io user_3 46
 set_io user_4 45
 set_io user_5 42
 set_io user_6 38
