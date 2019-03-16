@@ -40,3 +40,24 @@ Notice how there are a lot of LC usages, and only one DSP block:
      SB_LUT4                      2517
      SB_MAC16                        1
 ```
+
+Nextpnr output:
+
+```
+nfo: Device utilisation:
+Info:            ICESTORM_LC:  2577/ 5280    48%
+Info:           ICESTORM_RAM:     0/   30     0%
+Info:                  SB_IO:   102/   96   106%
+Info:                  SB_GB:     1/    8    12%
+Info:           ICESTORM_PLL:     0/    1     0%
+Info:            SB_WARMBOOT:     0/    1     0%
+Info:           ICESTORM_DSP:     1/    8    12%
+Info:         ICESTORM_HFOSC:     0/    1     0%
+Info:         ICESTORM_LFOSC:     0/    1     0%
+Info:                 SB_I2C:     0/    2     0%
+Info:                 SB_SPI:     0/    2     0%
+Info:                 IO_I3C:     0/    2     0%
+Info:            SB_LEDDA_IP:     0/    1     0%
+Info:            SB_RGBA_DRV:     0/    1     0%
+Info:         ICESTORM_SPRAM:     0/    4     0%
+```
