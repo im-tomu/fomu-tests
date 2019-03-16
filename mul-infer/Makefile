@@ -57,7 +57,7 @@ $(BUILD_DIR)/$(PACKAGE).json: $(VSOURCES) | $(BUILD_DIR)
 
 $(BUILD_DIR)/$(PACKAGE).asc: $(BUILD_DIR)/$(PACKAGE).json $(PCF)
 	$(QUIET) echo " PNR      $@"
-	$(QUIET) $(NEXTPNR) $(PNRFLAGS) --json $(BUILD_DIR)/$(PACKAGE).json --pcf $(PCF) --asc $@
+	$(QUIET) $(NEXTPNR) $(PNRFLAGS) --json $(BUILD_DIR)/$(PACKAGE).json --pcf $(PCF) --pcf-allow-unconstrained --asc $@
 
 $(TARGET): $(BUILD_DIR)/$(PACKAGE).asc
 	$(QUIET) echo " PACK     $@"
