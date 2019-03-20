@@ -102,20 +102,22 @@ module blink (
     //
     // https://www.latticesemi.com/-/media/LatticeSemi/Documents/ApplicationNotes/IK/ICE40LEDDriverUsageGuide.ashx?document_id=50668
     //
-    localparam RGBA_CURRENT_FULL = "0b0";
-    localparam RGBA_CURRENT_HALF = "0b1";
-    localparam RGBA_CURRENT_4MA  = "0b000001";
-    localparam RGBA_CURRENT_8MA  = "0b000011";
-    localparam RGBA_CURRENT_12MA = "0b000111";
-    localparam RGBA_CURRENT_16MA = "0b001111";
-    localparam RGBA_CURRENT_20MA = "0b011111";
-    localparam RGBA_CURRENT_24MA = "0b111111";
+    localparam RGBA_CURRENT_MODE_FULL = "0b0";
+    localparam RGBA_CURRENT_MODE_HALF = "0b1";
+
+    // Current levels in Full / Half mode
+    localparam RGBA_CURRENT_04MA_02MA = "0b000001";
+    localparam RGBA_CURRENT_08MA_04MA = "0b000011";
+    localparam RGBA_CURRENT_12MA_06MA = "0b000111";
+    localparam RGBA_CURRENT_16MA_08MA = "0b001111";
+    localparam RGBA_CURRENT_20MA_10MA = "0b011111";
+    localparam RGBA_CURRENT_24MA_12MA = "0b111111";
 
     // Mapping of RGBn to LED colours determined experimentally
     //
-    defparam RGBA_DRIVER.CURRENT_MODE = RGBA_CURRENT_HALF;
-    defparam RGBA_DRIVER.RGB0_CURRENT = RGBA_CURRENT_8MA;  // Blue
-    defparam RGBA_DRIVER.RGB1_CURRENT = RGBA_CURRENT_4MA;  // Red
-    defparam RGBA_DRIVER.RGB2_CURRENT = RGBA_CURRENT_4MA;  // Green
+    defparam RGBA_DRIVER.CURRENT_MODE = RGBA_CURRENT_MODE_HALF;
+    defparam RGBA_DRIVER.RGB0_CURRENT = RGBA_CURRENT_08MA_04MA;  // Blue
+    defparam RGBA_DRIVER.RGB1_CURRENT = RGBA_CURRENT_04MA_02MA;  // Red
+    defparam RGBA_DRIVER.RGB2_CURRENT = RGBA_CURRENT_04MA_02MA;  // Green
 
 endmodule
