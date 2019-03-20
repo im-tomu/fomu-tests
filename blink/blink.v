@@ -90,17 +90,32 @@ module blink (
     SB_RGBA_DRV RGBA_DRIVER (
         .CURREN(1'b1),
         .RGBLEDEN(1'b1),
-        .RGB0PWM(~user_5_pulled),
-        .RGB1PWM(~user_6_pulled),
-        .RGB2PWM(outcnt[4]),
+        .RGB0PWM(~user_5_pulled),       // Blue
+        .RGB1PWM(~user_6_pulled),       // Red
+        .RGB2PWM(outcnt[4]),            // Green
         .RGB0(led_r),
         .RGB1(led_g),
         .RGB2(led_b)
     );
 
-    defparam RGBA_DRIVER.CURRENT_MODE = "0b0"; // Full-current mode (set to 1 for half-current)
-    defparam RGBA_DRIVER.RGB0_CURRENT = "0b001111"; // 8 mA
-    defparam RGBA_DRIVER.RGB1_CURRENT = "0b001111"; // 16 mA
-    defparam RGBA_DRIVER.RGB2_CURRENT = "0b001111"; // 24 mA
+    // Parameters from iCE40 UltraPlus LED Driver Usage Guide, pages 19-20
+    //
+    // https://www.latticesemi.com/-/media/LatticeSemi/Documents/ApplicationNotes/IK/ICE40LEDDriverUsageGuide.ashx?document_id=50668
+    //
+    localparam RGBA_CURRENT_FULL = "0b0";
+    localparam RGBA_CURRENT_HALF = "0b1";
+    localparam RGBA_CURRENT_4MA  = "0b000001";
+    localparam RGBA_CURRENT_8MA  = "0b000011";
+    localparam RGBA_CURRENT_12MA = "0b000111";
+    localparam RGBA_CURRENT_16MA = "0b001111";
+    localparam RGBA_CURRENT_20MA = "0b011111";
+    localparam RGBA_CURRENT_24MA = "0b111111";
+
+    // Mapping of RGBn to LED colours determined experimentally
+    //
+    defparam RGBA_DRIVER.CURRENT_MODE = RGBA_CURRENT_HALF;
+    defparam RGBA_DRIVER.RGB0_CURRENT = RGBA_CURRENT_8MA;  // Blue
+    defparam RGBA_DRIVER.RGB1_CURRENT = RGBA_CURRENT_4MA;  // Red
+    defparam RGBA_DRIVER.RGB2_CURRENT = RGBA_CURRENT_4MA;  // Green
 
 endmodule
