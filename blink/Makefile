@@ -45,6 +45,9 @@ CLEAN      = clean
 
 $(ALL): $(TARGET)
 
+run: $(TARGET)
+	fomu-flash -f $(TARGET)
+
 $(BUILD_DIR)/$(PACKAGE).json: $(VSOURCES) | $(BUILD_DIR)
 	$(QUIET) echo " SYNTH    $@"
 	$(QUIET) $(YOSYS) -p 'synth_ice40 -top $(TOP) -json $@' $(PACKAGE).v
