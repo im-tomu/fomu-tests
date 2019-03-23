@@ -1,8 +1,8 @@
 // Simple tri-colour LED blink example, with button control
 //
-// 1st LED colour: controlled by pressing Button 5
-// 2nd LED colour: controlled by pressing Button 6
-// 3rd LED colour: controlled by clock (blinking)
+// 1st LED colour - Blue  - controlled by pressing Button 5
+// 2nd LED colour - Red   - controlled by pressing Button 6
+// 3rd LED colour - Green - controlled by clock (blinking)
 //
 // LOG2DELAY controls the division of the module clock to the bit interval
 // (by requiring count to 2 ** LOG2DELAY before changing LED state bits)
@@ -103,9 +103,9 @@ module blink (
         .RGB0PWM(~user_5_pulled),       // Blue
         .RGB1PWM(~user_6_pulled),       // Red
         .RGB2PWM(outcnt[4]),            // Green
-        .RGB0(led_r),
-        .RGB1(led_g),
-        .RGB2(led_b)
+        .RGB0(led_b),
+        .RGB1(led_r),
+        .RGB2(led_g)
     );
 
     // Parameters from iCE40 UltraPlus LED Driver Usage Guide, pages 19-20
