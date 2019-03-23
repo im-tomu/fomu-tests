@@ -20,22 +20,6 @@ module blink (
     input clki         // Clock
 );
 
-    wire clkhf;
-    // SB_HFOSC #(
-    //     .CLKHF_DIV("0b00")
-    // ) hfosc (
-    //     .CLKHFPU(1),
-    //     .CLKHFEN(1),
-    //     .CLKHF(clk)
-    // );
-
-    // wire clklf;
-    // SB_LFOSC clk_lf (
-    //     .CLKLFEN(1),
-    //     .CLKLFPU(1),
-    //     .CLKLF(clklf)
-    // );
-
     // Connect to system clock (with buffering)
     wire clkosc;
     SB_GB clk_gb (
