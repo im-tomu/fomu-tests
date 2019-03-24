@@ -1,32 +1,26 @@
+// Simple tri-colour LED blink example, with button control
+//
+// 1st LED colour - Blue  - controlled by pressing Button 5
+// 2nd LED colour - Red   - controlled by pressing Button 6
+// 3rd LED colour - Green - controlled by clock (blinking)
+//
+// LOG2DELAY controls the division of the module clock to the bit interval
+// (by requiring count to 2 ** LOG2DELAY before changing LED state bits)
+//
 module blink (
-    output led_r,
-    output led_g,
-    output led_b,
-    output pmod_1,
+    output led_r,      // Red LED
+    output led_g,      // Green LED
+    output led_b,      // Blue LED
+    output pmod_1,     // Ouput connector (for monitoring internal state)
     output pmod_2,
     output pmod_3,
     output pmod_4,
-    input user_5,
-    input user_6,
-    input clki
+    input user_5,      // Button 5
+    input user_6,      // Button 6
+    input clki         // Clock
 );
 
-    wire clkhf;
-    // SB_HFOSC #(
-    //     .CLKHF_DIV("0b00")
-    // ) hfosc (
-    //     .CLKHFPU(1),
-    //     .CLKHFEN(1),
-    //     .CLKHF(clk)
-    // );
-
-    // wire clklf;
-    // SB_LFOSC clk_lf (
-    //     .CLKLFEN(1),
-    //     .CLKLFPU(1),
-    //     .CLKLF(clklf)
-    // );
-
+    // Connect to system clock (with buffering)
     wire clkosc;
     SB_GB clk_gb (
         .USER_SIGNAL_TO_GLOBAL_BUFFER(clki),
@@ -35,6 +29,7 @@ module blink (
 
     assign clk = clkosc;
 
+    // Latch button 5 state
     wire user_5_pulled;
     SB_IO #(
         .PIN_TYPE(6'b 000001),
@@ -46,6 +41,7 @@ module blink (
         .D_IN_0(user_5_pulled),
     );
 
+    // Latch button 6 state
     wire user_6_pulled;
     SB_IO #(
         .PIN_TYPE(6'b 000000),
@@ -57,6 +53,8 @@ module blink (
         .D_IN_0(user_6_pulled),
     );
 
+    // Use system PLL module to divide system clock
+    // (connected to pmod output below)
     wire pll_out;
     SB_PLL40_CORE #(
         .FEEDBACK_PATH("SIMPLE"),
@@ -71,6 +69,13 @@ module blink (
         .PLLOUTCORE(pll_out),
     );
 
+    // Use counter logic to divide system clock
+    // (for blinking LED state)
+    //
+    // BITS controls LED state
+    // LOG2DELAY controls divisor
+    // -- requires counting to 2**LOG2DELAY before spilling onto LED state BITS
+    //
     localparam BITS = 5;
     localparam LOG2DELAY = 21;
 
@@ -82,20 +87,25 @@ module blink (
         outcnt <= counter >> LOG2DELAY;
     end
 
+    // Make signals available on PMOD header output for scope
+    // (or to inspect during simulation)
     assign pmod_1 = clk;
     assign pmod_2 = outcnt ^ (outcnt >> 1);
     assign pmod_3 = counter[0];
     assign pmod_4 = pll_out;
 
+    // Instantiate iCE40 LED driver hard logic, connecting up
+    // latched button state, counter state, and LEDs.
+    //
     SB_RGBA_DRV RGBA_DRIVER (
         .CURREN(1'b1),
         .RGBLEDEN(1'b1),
         .RGB0PWM(~user_5_pulled),       // Blue
         .RGB1PWM(~user_6_pulled),       // Red
         .RGB2PWM(outcnt[4]),            // Green
-        .RGB0(led_r),
-        .RGB1(led_g),
-        .RGB2(led_b)
+        .RGB0(led_b),
+        .RGB1(led_r),
+        .RGB2(led_g)
     );
 
     // Parameters from iCE40 UltraPlus LED Driver Usage Guide, pages 19-20
@@ -113,6 +123,8 @@ module blink (
     localparam RGBA_CURRENT_20MA_10MA = "0b011111";
     localparam RGBA_CURRENT_24MA_12MA = "0b111111";
 
+    // Set parameters of RGBA_DRIVER (output current)
+    //
     // Mapping of RGBn to LED colours determined experimentally
     //
     defparam RGBA_DRIVER.CURRENT_MODE = RGBA_CURRENT_MODE_HALF;
