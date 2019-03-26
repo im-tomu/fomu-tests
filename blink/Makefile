@@ -27,15 +27,18 @@ PCF       ?= $(PCF_PATH)/fomu-evt3.pcf
 PKG       ?= sg48
 YOSYSFLAGS?= -D EVT=1 -D EVT3=1 -D HAVE_PMOD=1
 PNRFLAGS  ?= --up5k --package $(PKG)
-else
-ifeq ($(FOMU_REV),evt2)
+else ifeq ($(FOMU_REV),evt2)
 PCF       ?= $(PCF_PATH)/fomu-evt2.pcf
 PKG       ?= sg48
 YOSYSFLAGS?= -D EVT=1 -D EVT2=1 -D HAVE_PMOD=1
 PNRFLAGS  ?= --up5k --package $(PKG)
+else ifeq ($(FOMU_REV),hacker)
+PCF       ?= $(PCF_PATH)/fomu-hacker.pcf
+PKG       ?= uwg30
+YOSYSFLAGS?= -D HACKER=1
+PNRFLAGS  ?= --up5k --package $(PKG)
 else
 $(error Unrecognized FOMU_REV value. must be "evt2" or "evt3")
-endif
 endif
 
 BUILD_DIR  = .build
