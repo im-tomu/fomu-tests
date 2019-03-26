@@ -14,9 +14,9 @@
 //
 // On DVT / Hacker / Production Fomu boards:
 //
-// 1st LED colour - Blue  - controlled by pressing Button 5
+// 1st LED colour - Blue  - controlled by pressing first button
 // 2nd LED colour - Green - controlled by clock (blinking)
-// 3rd LED colour - Red   - controlled by pressing Button 6
+// 3rd LED colour - Red   - controlled by pressing second button
 //
 // We use `defines to handle these two cases, because the SB_RGBA_DRV
 // iCE40UP5K hard macro is unable to do RGBn to output pin mapping internally
@@ -25,14 +25,23 @@
 // errors if they are not, and currently nextpnr just ignores mismapped
 // pins and enforces this mapping)
 //
+// This is all kludged into a single file to make a standalone simple test;
+// a better design would wrap SB_RGBA_DRV into a Fomu specific module and
+// hide the LED colour mapping; and also set the appropriate pins for
+// the buttons at instantiation time.
+//
 `ifdef EVT
 `define BLUEPWM  RGB0PWM
 `define REDPWM   RGB1PWM
 `define GREENPWM RGB2PWM
+`define BUTTON1  user_5
+`define BUTTON2  user_6
 `else
 `define BLUEPWM  RGB0PWM
 `define GREENPWM RGB1PWM
 `define REDPWM   RGB2PWM
+`define BUTTON1  pin1
+`define BUTTON2  pin4
 `endif
 
 module blink (
@@ -45,8 +54,8 @@ module blink (
     output pmod_3,
     output pmod_4,
 `endif
-    input user_5,      // Button 5
-    input user_6,      // Button 6
+    input `BUTTON1,    // Button 5 on EVT, pin1 on Hacker board
+    input `BUTTON2,    // Button 6 on EVT, pin4 on Hacker board
     input clki         // Clock
 );
 
@@ -59,28 +68,28 @@ module blink (
 
     assign clk = clkosc;
 
-    // Latch button 5 state
-    wire user_5_pulled;
+    // Latch first button state
+    wire button_1_pulled;
     SB_IO #(
         .PIN_TYPE(6'b 000001),
         .PULLUP(1'b 1)
-    ) user_5_io (
-        .PACKAGE_PIN(user_5),
+    ) button_1_io (
+        .PACKAGE_PIN(`BUTTON1),
         .OUTPUT_ENABLE(1'b0),
         .INPUT_CLK(clk),
-        .D_IN_0(user_5_pulled),
+        .D_IN_0(button_1_pulled),
     );
 
-    // Latch button 6 state
-    wire user_6_pulled;
+    // Latch second button state
+    wire button_2_pulled;
     SB_IO #(
         .PIN_TYPE(6'b 000000),
         .PULLUP(1'b 1)
-    ) user_6_io (
-        .PACKAGE_PIN(user_6),
+    ) button_2_io (
+        .PACKAGE_PIN(`BUTTON2),
         .OUTPUT_ENABLE(1'b0),
         .INPUT_CLK(clk),
-        .D_IN_0(user_6_pulled),
+        .D_IN_0(button_2_pulled),
     );
 
     // Use system PLL module to divide system clock
@@ -132,8 +141,8 @@ module blink (
     SB_RGBA_DRV RGBA_DRIVER (
         .CURREN(1'b1),
         .RGBLEDEN(1'b1),
-        .`BLUEPWM(~user_5_pulled),     // Blue
-        .`REDPWM(~user_6_pulled),      // Red
+        .`BLUEPWM(~button_1_pulled),   // Blue
+        .`REDPWM(~button_2_pulled),    // Red
         .`GREENPWM(outcnt[4]),         // Green
         .RGB0(rgb0),
         .RGB1(rgb1),
