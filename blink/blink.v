@@ -40,8 +40,8 @@
 `define BLUEPWM  RGB0PWM
 `define GREENPWM RGB1PWM
 `define REDPWM   RGB2PWM
-`define BUTTON1  pin1
-`define BUTTON2  pin4
+`define BUTTON1  user_1
+`define BUTTON2  user_4
 `endif
 
 module blink (
@@ -54,8 +54,8 @@ module blink (
     output pmod_3,
     output pmod_4,
 `endif
-    input `BUTTON1,    // Button 5 on EVT, pin1 on Hacker board
-    input `BUTTON2,    // Button 6 on EVT, pin4 on Hacker board
+    input `BUTTON1,    // Button 5 on EVT, short pin 1 - 2 on Hacker board
+    input `BUTTON2,    // Button 6 on EVT, short pin 3 - 4 on Hacker board
     input clki         // Clock
 );
 
