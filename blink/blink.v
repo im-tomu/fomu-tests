@@ -14,9 +14,9 @@
 //
 // On DVT / Hacker / Production Fomu boards:
 //
-// 1st LED colour - Blue  - controlled by pressing connecting pin 1 to 2
+// 1st LED colour - Blue  - turn on by connecting pin 1 to pin 2
 // 2nd LED colour - Green - controlled by clock (blinking)
-// 3rd LED colour - Red   - controlled by pressing connecting pin 3 to 4
+// 3rd LED colour - Red   - turn on by connecting pin 3 to pin 4
 //
 // We use `defines to handle these two cases, because the SB_RGBA_DRV
 // iCE40UP5K hard macro is unable to do RGBn to output pin mapping internally
