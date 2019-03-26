@@ -47,6 +47,7 @@ TARGET     = $(PACKAGE).bin
 CLEAN      = clean
 
 $(ALL): $(TARGET)
+	$(QUIET) echo "Built '$(PACKAGE)' for Fomu $(FOMU_REV)"
 
 run: $(TARGET)
 	fomu-flash -f $(TARGET)
