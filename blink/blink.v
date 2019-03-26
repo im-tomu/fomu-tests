@@ -36,9 +36,9 @@
 `endif
 
 module blink (
-    output led_r,      // Red LED
-    output led_g,      // Green LED
-    output led_b,      // Blue LED
+    output rgb0,       // SB_RGBA_DRV external pins
+    output rgb1,
+    output rgb2,
 `ifdef HAVE_PMOD
     output pmod_1,     // PMOD ouput connector (on EVT boards)
     output pmod_2,
@@ -135,9 +135,9 @@ module blink (
         .`BLUEPWM(~user_5_pulled),     // Blue
         .`REDPWM(~user_6_pulled),      // Red
         .`GREENPWM(outcnt[4]),         // Green
-        .RGB0(led_b),
-        .RGB1(led_r),
-        .RGB2(led_g)
+        .RGB0(rgb0),
+        .RGB1(rgb1),
+        .RGB2(rgb2)
     );
 
     // Parameters from iCE40 UltraPlus LED Driver Usage Guide, pages 19-20
