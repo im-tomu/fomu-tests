@@ -1,20 +1,50 @@
 // Simple tri-colour LED blink example, with button control
 //
-// 1st LED colour - Blue  - controlled by pressing Button 5
-// 2nd LED colour - Red   - controlled by pressing Button 6
-// 3rd LED colour - Green - controlled by clock (blinking)
+// Green LED blinks forever.  Blue LED turned on when Button 5 is pressed.
+// Red LED turned on when Button 6 is pressed.
 //
 // LOG2DELAY controls the division of the module clock to the bit interval
 // (by requiring count to 2 ** LOG2DELAY before changing LED state bits)
 //
+// On EVT Fomu boards:
+//
+// 1st LED colour - Blue  - controlled by pressing Button 5
+// 2nd LED colour - Red   - controlled by pressing Button 6
+// 3rd LED colour - Green - controlled by clock (blinking)
+//
+// On DVT / Hacker / Production Fomu boards:
+//
+// 1st LED colour - Blue  - controlled by pressing Button 5
+// 2nd LED colour - Green - controlled by clock (blinking)
+// 3rd LED colour - Red   - controlled by pressing Button 6
+//
+// We use `defines to handle these two cases, because the SB_RGBA_DRV
+// iCE40UP5K hard macro is unable to do RGBn to output pin mapping internally
+// (the RGB0 / RGB1 / RGB2 parameters to SB_RGBA_DRV *must* be mapped
+// to the same named RGB0 / RGB1 / RGB2 physical pins; arachne-pnr
+// errors if they are not, and currently nextpnr just ignores mismapped
+// pins and enforces this mapping)
+//
+`ifdef EVT
+`define BLUEPWM  RGB0PWM
+`define REDPWM   RGB1PWM
+`define GREENPWM RGB2PWM
+`else
+`define BLUEPWM  RGB0PWM
+`define GREENPWM RGB1PWM
+`define REDPWM   RGB2PWM
+`endif
+
 module blink (
     output led_r,      // Red LED
     output led_g,      // Green LED
     output led_b,      // Blue LED
-    output pmod_1,     // Ouput connector (for monitoring internal state)
+`ifdef HAVE_PMOD
+    output pmod_1,     // PMOD ouput connector (on EVT boards)
     output pmod_2,
     output pmod_3,
     output pmod_4,
+`endif
     input user_5,      // Button 5
     input user_6,      // Button 6
     input clki         // Clock
@@ -89,10 +119,12 @@ module blink (
 
     // Make signals available on PMOD header output for scope
     // (or to inspect during simulation)
+`ifdef HAVE_PMOD
     assign pmod_1 = clk;
     assign pmod_2 = outcnt ^ (outcnt >> 1);
     assign pmod_3 = counter[0];
     assign pmod_4 = pll_out;
+`endif
 
     // Instantiate iCE40 LED driver hard logic, connecting up
     // latched button state, counter state, and LEDs.
@@ -100,9 +132,9 @@ module blink (
     SB_RGBA_DRV RGBA_DRIVER (
         .CURREN(1'b1),
         .RGBLEDEN(1'b1),
-        .RGB0PWM(~user_5_pulled),       // Blue
-        .RGB1PWM(~user_6_pulled),       // Red
-        .RGB2PWM(outcnt[4]),            // Green
+        .`BLUEPWM(~user_5_pulled),     // Blue
+        .`REDPWM(~user_6_pulled),      // Red
+        .`GREENPWM(outcnt[4]),         // Green
         .RGB0(led_b),
         .RGB1(led_r),
         .RGB2(led_g)

@@ -1,7 +1,8 @@
 PACKAGE   ?= $(notdir $(realpath .))
 TOP       ?= $(PACKAGE)
 
-GIT_VERSION := $(shell git describe --tags)
+# Currently GIT_VERSION is unusd and there are no tags, so skip calculating it
+#GIT_VERSION := $(shell git describe --tags)
 
 # Default programs
 NEXTPNR   ?= nextpnr-ice40
@@ -24,11 +25,13 @@ FOMU_REV  ?= evt3
 ifeq ($(FOMU_REV),evt3)
 PCF       ?= $(PCF_PATH)/fomu-evt3.pcf
 PKG       ?= sg48
+YOSYSFLAGS?= -D EVT=1 -D EVT3=1 -D HAVE_PMOD=1
 PNRFLAGS  ?= --up5k --package $(PKG)
 else
 ifeq ($(FOMU_REV),evt2)
 PCF       ?= $(PCF_PATH)/fomu-evt2.pcf
 PKG       ?= sg48
+YOSYSFLAGS?= -D EVT=1 -D EVT2=1 -D HAVE_PMOD=1
 PNRFLAGS  ?= --up5k --package $(PKG)
 else
 $(error Unrecognized FOMU_REV value. must be "evt2" or "evt3")
@@ -50,7 +53,7 @@ run: $(TARGET)
 
 $(BUILD_DIR)/$(PACKAGE).json: $(VSOURCES) | $(BUILD_DIR)
 	$(QUIET) echo " SYNTH    $@"
-	$(QUIET) $(YOSYS) -p 'synth_ice40 -top $(TOP) -json $@' $(PACKAGE).v
+	$(QUIET) $(YOSYS) $(YOSYSFLAGS) -p 'synth_ice40 -top $(TOP) -json $@' $(PACKAGE).v
 
 $(BUILD_DIR)/$(PACKAGE).asc: $(BUILD_DIR)/$(PACKAGE).json $(PCF)
 	$(QUIET) echo " PNR      $@"
