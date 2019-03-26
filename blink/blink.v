@@ -8,15 +8,15 @@
 //
 // On EVT Fomu boards:
 //
-// 1st LED colour - Blue  - controlled by pressing Button 5
-// 2nd LED colour - Red   - controlled by pressing Button 6
+// 1st LED colour - Blue  - controlled by pressing Button 5, or connect 1 to 2
+// 2nd LED colour - Red   - controlled by pressing Button 6, or connect 3 to 4
 // 3rd LED colour - Green - controlled by clock (blinking)
 //
 // On DVT / Hacker / Production Fomu boards:
 //
-// 1st LED colour - Blue  - controlled by pressing first button
+// 1st LED colour - Blue  - controlled by pressing connecting pin 1 to 2
 // 2nd LED colour - Green - controlled by clock (blinking)
-// 3rd LED colour - Red   - controlled by pressing second button
+// 3rd LED colour - Red   - controlled by pressing connecting pin 3 to 4
 //
 // We use `defines to handle these two cases, because the SB_RGBA_DRV
 // iCE40UP5K hard macro is unable to do RGBn to output pin mapping internally
@@ -34,14 +34,10 @@
 `define BLUEPWM  RGB0PWM
 `define REDPWM   RGB1PWM
 `define GREENPWM RGB2PWM
-`define BUTTON1  user_5
-`define BUTTON2  user_6
 `else
 `define BLUEPWM  RGB0PWM
 `define GREENPWM RGB1PWM
 `define REDPWM   RGB2PWM
-`define BUTTON1  user_1
-`define BUTTON2  user_4
 `endif
 
 module blink (
@@ -54,8 +50,14 @@ module blink (
     output pmod_3,
     output pmod_4,
 `endif
-    input `BUTTON1,    // Button 5 on EVT, short pin 1 - 2 on Hacker board
-    input `BUTTON2,    // Button 6 on EVT, short pin 3 - 4 on Hacker board
+    input  user_1,     // User touchable pins
+    output user_2,     // Connect 1-2 to enable blue LED
+    output user_3,     // Connect 3-4 to enable red LED
+    input  user_4,
+`ifdef EVT
+    input  user_5,      // Button 5 on EVT only
+    input  user_6,      // Button 6 on EVT only
+`endif
     input clki         // Clock
 );
 
@@ -68,29 +70,74 @@ module blink (
 
     assign clk = clkosc;
 
-    // Connect first physical button, with pullup enabled
-    wire button_1_pulled;
+    // Configure user pins so that we can detect the user connecting
+    // 1-2 or 3-4 with conductive material.
+    //
+    // We do this by grounding user_2 and user_3, and configuring inputs
+    // with pullups on user_1 and user_4.
+    //
+    localparam SB_IO_TYPE_SIMPLE_INPUT = 6'b000001;
+
+    wire user_1_pulled;
     SB_IO #(
-        .PIN_TYPE(6'b 000001),
+        .PIN_TYPE(SB_IO_TYPE_SIMPLE_INPUT),
         .PULLUP(1'b 1)
-    ) button_1_io (
-        .PACKAGE_PIN(`BUTTON1),
+    ) user_1_io (
+        .PACKAGE_PIN(user_1),
         .OUTPUT_ENABLE(1'b0),
         .INPUT_CLK(clk),
-        .D_IN_0(button_1_pulled),
+        .D_IN_0(user_1_pulled),
+    );
+
+    assign user_2 = 1'b0;
+    assign user_3 = 1'b0;
+
+    wire user_4_pulled;
+    SB_IO #(
+        .PIN_TYPE(SB_IO_TYPE_SIMPLE_INPUT),
+        .PULLUP(1'b 1)
+    ) user_4_io (
+        .PACKAGE_PIN(user_4),
+        .OUTPUT_ENABLE(1'b0),
+        .INPUT_CLK(clk),
+        .D_IN_0(user_4_pulled),
+    );
+
+    // On EVT boards, there are also physical buttons
+    //
+`ifdef EVT
+    // Connect first physical button, with pullup enabled
+    wire user_5_pulled;
+    SB_IO #(
+        .PIN_TYPE(SB_IO_TYPE_SIMPLE_INPUT),
+        .PULLUP(1'b 1)
+    ) user_5_io (
+        .PACKAGE_PIN(user_5),
+        .OUTPUT_ENABLE(1'b0),
+        .INPUT_CLK(clk),
+        .D_IN_0(user_5_pulled),
     );
 
     // Connect second physical button, with pullup enabled
-    wire button_2_pulled;
+    wire user_6_pulled;
     SB_IO #(
-        .PIN_TYPE(6'b 000001),
+        .PIN_TYPE(SB_IO_TYPE_SIMPLE_INPUT),
         .PULLUP(1'b 1)
-    ) button_2_io (
-        .PACKAGE_PIN(`BUTTON2),
+    ) user_6_io (
+        .PACKAGE_PIN(user_6),
         .OUTPUT_ENABLE(1'b0),
         .INPUT_CLK(clk),
-        .D_IN_0(button_2_pulled),
+        .D_IN_0(user_6_pulled),
     );
+
+    // Allow touch buttons or physical buttons to control LEDs
+    wire enable_blue = ~user_1_pulled | ~user_5_pulled;
+    wire enable_red  = ~user_4_pulled | ~user_6_pulled;
+`else
+    // On non-EVT platorms, there are only touch buttons
+    wire enable_blue = ~user_1_pulled;
+    wire enable_red  = ~user_4_pulled;
+`endif
 
     // Use system PLL module to divide system clock
     // (connected to pmod output below)
@@ -141,9 +188,9 @@ module blink (
     SB_RGBA_DRV RGBA_DRIVER (
         .CURREN(1'b1),
         .RGBLEDEN(1'b1),
-        .`BLUEPWM(~button_1_pulled),   // Blue
-        .`REDPWM(~button_2_pulled),    // Red
-        .`GREENPWM(outcnt[4]),         // Green
+        .`BLUEPWM(enable_blue),   // Blue
+        .`REDPWM(enable_red),     // Red
+        .`GREENPWM(outcnt[4]),    // Green (blinking)
         .RGB0(rgb0),
         .RGB1(rgb1),
         .RGB2(rgb2)
