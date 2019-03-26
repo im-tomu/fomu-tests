@@ -68,7 +68,7 @@ module blink (
 
     assign clk = clkosc;
 
-    // Latch first button state
+    // Connect first physical button, with pullup enabled
     wire button_1_pulled;
     SB_IO #(
         .PIN_TYPE(6'b 000001),
@@ -80,10 +80,10 @@ module blink (
         .D_IN_0(button_1_pulled),
     );
 
-    // Latch second button state
+    // Connect second physical button, with pullup enabled
     wire button_2_pulled;
     SB_IO #(
-        .PIN_TYPE(6'b 000000),
+        .PIN_TYPE(6'b 000001),
         .PULLUP(1'b 1)
     ) button_2_io (
         .PACKAGE_PIN(`BUTTON2),
