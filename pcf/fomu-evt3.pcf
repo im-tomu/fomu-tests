@@ -1,6 +1,6 @@
-set_io led_b 39
-set_io led_r 40
-set_io led_g 41
+set_io rgb0 39
+set_io rgb1 40
+set_io rgb2 41
 set_io pmod_1 28
 set_io pmod_2 27
 set_io pmod_3 26
