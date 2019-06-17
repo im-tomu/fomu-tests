@@ -21,7 +21,6 @@ RM         = del
 PATH_SEP   = \\
 endif
 
-FOMU_REV  ?= evt3
 ifeq ($(FOMU_REV),evt3)
 PCF       ?= $(PCF_PATH)/fomu-evt3.pcf
 PKG       ?= sg48
@@ -32,13 +31,23 @@ PCF       ?= $(PCF_PATH)/fomu-evt2.pcf
 PKG       ?= sg48
 YOSYSFLAGS?= -D EVT=1 -D EVT2=1 -D HAVE_PMOD=1
 PNRFLAGS  ?= --up5k --package $(PKG)
+else ifeq ($(FOMU_REV),evt1)
+PCF       ?= $(PCF_PATH)/fomu-evt2.pcf
+PKG       ?= sg48
+YOSYSFLAGS?= -D EVT=1 -D EVT1=1 -D HAVE_PMOD=1
+PNRFLAGS  ?= --up5k --package $(PKG)
 else ifeq ($(FOMU_REV),hacker)
 PCF       ?= $(PCF_PATH)/fomu-hacker.pcf
 PKG       ?= uwg30
 YOSYSFLAGS?= -D HACKER=1
 PNRFLAGS  ?= --up5k --package $(PKG)
+else ifeq ($(FOMU_REV),pvt1)
+PCF       ?= $(PCF_PATH)/fomu-pvt1.pcf
+PKG       ?= uwg30
+YOSYSFLAGS?= -D PVT=1 -D PVT1=1
+PNRFLAGS  ?= --up5k --package $(PKG)
 else
-$(error Unrecognized FOMU_REV value. must be "evt2" or "evt3")
+$(error Unrecognized FOMU_REV value. must be "evt1", "evt2", "evt3", "pvt1", or "hacker")
 endif
 
 BUILD_DIR  = .build
