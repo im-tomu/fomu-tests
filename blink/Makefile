@@ -87,4 +87,6 @@ clean:
 	$(QUIET) echo "  RM      $(subst /,$(PATH_SEP),$(wildcard $(BUILD_DIR)/*.asc))"
 	-$(QUIET) $(RM) $(subst /,$(PATH_SEP),$(wildcard $(BUILD_DIR)/*.asc))
 	$(QUIET) echo "  RM      $(TARGET) $(PACKAGE).bin"
+	-$(QUIET) $(RM) $(subst /,$(PATH_SEP),abc.history)
+	$(QUIET) echo "  RM      $(TARGET) abc.history"
 	-$(QUIET) $(RM) $(TARGET) $(PACKAGE).bin
