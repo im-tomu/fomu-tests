@@ -35,15 +35,25 @@
 `define REDPWM   RGB1PWM
 `define GREENPWM RGB2PWM
 `else
+`ifdef PVT
+`define GREENPWM RGB0PWM
+`define REDPWM   RGB1PWM
+`define BLUEPWM  RGB2PWM
+`else
 `define BLUEPWM  RGB0PWM
 `define GREENPWM RGB1PWM
 `define REDPWM   RGB2PWM
+`endif
 `endif
 
 module blink (
     output rgb0,       // SB_RGBA_DRV external pins
     output rgb1,
     output rgb2,
+    output usb_dp,
+    output usb_dn,
+    output usb_dn,
+    output usb_dp_pu,
 `ifdef HAVE_PMOD
     output pmod_1,     // PMOD ouput connector (on EVT boards)
     output pmod_2,
@@ -60,6 +70,10 @@ module blink (
 `endif
     input clki         // Clock
 );
+
+    assign usb_dp = 1'b0;
+    assign usb_dn = 1'b0;
+    assign usb_dp_pu = 1'b0;
 
     // Connect to system clock (with buffering)
     wire clkosc;
@@ -81,7 +95,7 @@ module blink (
     wire user_1_pulled;
     SB_IO #(
         .PIN_TYPE(SB_IO_TYPE_SIMPLE_INPUT),
-        .PULLUP(1'b 1)
+        .PULLUP(1'b1)
     ) user_1_io (
         .PACKAGE_PIN(user_1),
         .OUTPUT_ENABLE(1'b0),
@@ -165,7 +179,7 @@ module blink (
     localparam BITS = 5;
     localparam LOG2DELAY = 21;
 
-    reg [BITS+LOG2DELAY-1:0] counter = 0;
+    reg [28:0] counter = 0;
     reg [BITS-1:0] outcnt;
 
     always @(posedge clk) begin
@@ -188,9 +202,9 @@ module blink (
     SB_RGBA_DRV RGBA_DRIVER (
         .CURREN(1'b1),
         .RGBLEDEN(1'b1),
-        .`BLUEPWM(enable_blue),   // Blue
-        .`REDPWM(enable_red),     // Red
-        .`GREENPWM(outcnt[4]),    // Green (blinking)
+        .`BLUEPWM(enable_blue),     // Blue
+        .`REDPWM(enable_red),       // Red
+        .`GREENPWM(counter[23]),    // Green (blinking)
         .RGB0(rgb0),
         .RGB1(rgb1),
         .RGB2(rgb2)
@@ -217,7 +231,7 @@ module blink (
     //
     defparam RGBA_DRIVER.CURRENT_MODE = RGBA_CURRENT_MODE_HALF;
     defparam RGBA_DRIVER.RGB0_CURRENT = RGBA_CURRENT_08MA_04MA;  // Blue
-    defparam RGBA_DRIVER.RGB1_CURRENT = RGBA_CURRENT_04MA_02MA;  // Red
-    defparam RGBA_DRIVER.RGB2_CURRENT = RGBA_CURRENT_04MA_02MA;  // Green
+    defparam RGBA_DRIVER.RGB1_CURRENT = RGBA_CURRENT_08MA_04MA;  // Red
+    defparam RGBA_DRIVER.RGB2_CURRENT = RGBA_CURRENT_08MA_04MA;  // Green
 
 endmodule
