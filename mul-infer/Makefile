@@ -31,7 +31,13 @@ PCF       ?= $(PCF_PATH)/fomu-evt2.pcf
 PKG       ?= sg48
 PNRFLAGS  ?= --up5k --package $(PKG)
 else
+ifeq ($(FOMU_REV),pvt)
+PCF       ?= $(PCF_PATH)/fomu-pvt1.pcf
+PKG       ?= sg48
+PNRFLAGS  ?= --up5k --package $(PKG)
+else
 $(error Unrecognized FOMU_REV value. must be "evt2" or "evt3")
+endif
 endif
 endif
 
@@ -48,7 +54,7 @@ $(ALL): $(TARGET)
 test: MulInfer.vcd
 
 MulInfer.vcd: MulInfer_tb.v MulInfer.v
-	iverilog -o MulInfer.vvp .\MulInfer_tb.v .\MulInfer.v
+	iverilog -o MulInfer.vvp MulInfer_tb.v MulInfer.v
 	vvp ./MulInfer.vvp
 
 $(BUILD_DIR)/$(PACKAGE).json: $(VSOURCES) | $(BUILD_DIR)
